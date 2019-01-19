@@ -44,11 +44,12 @@ class Senddata extends Component {
       let freqData = [];
       for (let addr in calcBuffer)
         freqData.push(addr);
+      this.setState({ethernet: buffer,
+        data:[...this.state.data,freqData.length]});
 
-      this.setState({ethernet: freqData});
     });
 
-    console.log(this.state.ethernet);
+
 
     /* Get the ip data */
     app = this.props.db.database().ref('/ip');
@@ -77,7 +78,8 @@ class Senddata extends Component {
       for (let addr in calcBuffer)
         freqData.push(addr);
 
-      this.setState({ip: freqData});
+      this.setState({ip: buffer,
+      data:[...this.state.data, freqData.length]});
     });
 
     /* Get the tcp data */
@@ -99,13 +101,13 @@ class Senddata extends Component {
           URGENT_PTR:       val[item].URGENT_PTR,
         });
       }
-
       let calcBuffer = getFrequencyData(buffer, "SRC_PORT");
       let freqData = [];
       for (let addr in calcBuffer)
-        freqData.push(addr);
+      freqData.push(addr);
+      this.setState({tcp: buffer,
+      data:[...this.state.data, freqData.length]});
 
-      this.setState({tcp: freqData});
     });
 
 
@@ -113,27 +115,18 @@ class Senddata extends Component {
   }
 
   componentDidUpdate(){
-
-  }
-
-  /* Log the state data when it updates */
-  componentDidUpdate() {
-    console.log(this.state);
+    //console.log(this.state.data);
   }
 
   /* Render the UI components */
   render(){
-
+    //console.log('data' + this.state.data);
     return (
       <div>
         <Header/>
 
-        <Widget type='Bar' title='Number of Unique Source MAC Addresses' /*data={this.state.ethernet}*/
+        <Widget type='Bar' title='Number of Unique Source MAC Addresses' data={this.state.data}
         labels={['Ethernet', 'IP', 'TCP']}/>
-        <Widget/>
-        <Widget/>
-        <Widget/>
-        <Widget/>
         <Widget/>
       </div>
     )

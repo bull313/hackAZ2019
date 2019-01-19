@@ -6,8 +6,12 @@ class Widget extends Component{
 
   constructor(props){
     super(props);
+  }
+  render(){
+    console.log(this.props.data);
+    var dat = {}
     if(this.props.type == 'Bar'){
-      this.state = {
+       dat = {
         chartData: {
           labels: this.props.labels,
           datasets: [{
@@ -19,15 +23,14 @@ class Widget extends Component{
               'rgb(71, 195, 121)'
             ]
           }]
+
         }
       }
     }
-  }
-  render(){
     return(
       <div class='outershell'>
         {this.props.type == 'Bar' &&
-        <Bar data={this.state.chartData} options={{
+        <Bar data={dat.chartData} options={{
           maintainAspectRatio: false,
           title:{
             display: true,
@@ -40,8 +43,8 @@ class Widget extends Component{
           scales: {
                 yAxes : [{
                     ticks : {
-                        max : 100,
-                        min : 50
+                        suggestedMax : 5,
+                        suggestedMin : 0
                     }
                 }]
             }
