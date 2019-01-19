@@ -35,6 +35,7 @@ function getFrequencyData(data, property) {
 	Sorting is done with MergeSort algorithm
 */
 function sortDataByProp(data, comp) {
+    /* Merge function to complete the Merge Sort sorting algorithm */
     let merge = (left, right, comp) => {
         let result = [],
             lLen = left.length,
@@ -51,6 +52,7 @@ function sortDataByProp(data, comp) {
         return result.concat(left.slice(l)).concat(right.slice(r));
     }
 
+    /* Use Merge Sort to sort the data */
     let len = data.length;
     if (len < 2)
         return data;
@@ -59,4 +61,19 @@ function sortDataByProp(data, comp) {
         right = data.slice(mid);
 
     return merge(sortDataByProp(left, comp), sortDataByProp(right, comp), comp);
+}
+
+/*
+	Return all items in the given data set that have the specified value set for the specified key
+*/
+function filterData(data, key, value) {
+    let filteredData = [];
+
+    /* Only add item to filteredData if the item has the specified value at the specified key */
+    for (let i = 0; i < data.length; ++i) {
+        if (data[i][key] == value)
+            filteredData.push(data[i]);
+    }
+
+    return filteredData;
 }

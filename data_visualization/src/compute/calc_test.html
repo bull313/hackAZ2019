@@ -326,6 +326,122 @@
               ]
           );
 
+          let testFilterData = [
+            {
+              "SRC_PORT": "0",
+              "DIST_PORT": "0",
+              "SEQ_NUM": "0",
+              "ACK_NUM": "0",
+              "OFFSET_RESERVED": "0",
+              "TCP_FLAG": "0",
+              "WINDOW_SIZE": "0",
+              "CHECKSUM": "0",
+              "URGENT_PTR": "0"
+            },
+            {
+              "SRC_PORT": "1",
+              "DIST_PORT": "1",
+              "SEQ_NUM": "1",
+              "ACK_NUM": "1",
+              "OFFSET_RESERVED": "1",
+              "TCP_FLAG": "1",
+              "WINDOW_SIZE": "1",
+              "CHECKSUM": "1",
+              "URGENT_PTR": "1"
+            },
+            {
+              "SRC_PORT": "2",
+              "DIST_PORT": "2",
+              "SEQ_NUM": "2",
+              "ACK_NUM": "2",
+              "OFFSET_RESERVED": "2",
+              "TCP_FLAG": "0",
+              "WINDOW_SIZE": "2",
+              "CHECKSUM": "2",
+              "URGENT_PTR": "2"
+            },
+            {
+              "SRC_PORT": "3",
+              "DIST_PORT": "3",
+              "SEQ_NUM": "3",
+              "ACK_NUM": "3",
+              "OFFSET_RESERVED": "3",
+              "TCP_FLAG": "1",
+              "WINDOW_SIZE": "3",
+              "CHECKSUM": "3",
+              "URGENT_PTR": "3"
+            },
+            {
+              "SRC_PORT": "4",
+              "DIST_PORT": "4",
+              "SEQ_NUM": "4",
+              "ACK_NUM": "4",
+              "OFFSET_RESERVED": "4",
+              "TCP_FLAG": "1",
+              "WINDOW_SIZE": "4",
+              "CHECKSUM": "4",
+              "URGENT_PTR": "4"
+            }
+          ];
+
+          validateEq(
+              "Test filtering data by TCP_FLAG field",
+              filterData(testFilterData, "TCP_FLAG", 1),
+              [
+                {
+                  "SRC_PORT": "1",
+                  "DIST_PORT": "1",
+                  "SEQ_NUM": "1",
+                  "ACK_NUM": "1",
+                  "OFFSET_RESERVED": "1",
+                  "TCP_FLAG": "1",
+                  "WINDOW_SIZE": "1",
+                  "CHECKSUM": "1",
+                  "URGENT_PTR": "1"
+                },
+                {
+                  "SRC_PORT": "3",
+                  "DIST_PORT": "3",
+                  "SEQ_NUM": "3",
+                  "ACK_NUM": "3",
+                  "OFFSET_RESERVED": "3",
+                  "TCP_FLAG": "1",
+                  "WINDOW_SIZE": "3",
+                  "CHECKSUM": "3",
+                  "URGENT_PTR": "3"
+                },
+                {
+                  "SRC_PORT": "4",
+                  "DIST_PORT": "4",
+                  "SEQ_NUM": "4",
+                  "ACK_NUM": "4",
+                  "OFFSET_RESERVED": "4",
+                  "TCP_FLAG": "1",
+                  "WINDOW_SIZE": "4",
+                  "CHECKSUM": "4",
+                  "URGENT_PTR": "4"
+                }
+              ]
+          );
+
+          validateEq(
+              "Test filtering data by URGENT_PTR field",
+              filterData(testFilterData, "URGENT_PTR", 0),
+              [
+                {
+                  "SRC_PORT": "0",
+                  "DIST_PORT": "0",
+                  "SEQ_NUM": "0",
+                  "ACK_NUM": "0",
+                  "OFFSET_RESERVED": "0",
+                  "TCP_FLAG": "0",
+                  "WINDOW_SIZE": "0",
+                  "CHECKSUM": "0",
+                  "URGENT_PTR": "0"
+                }
+              ]
+          );
+
       };
     </script>
   </head>
