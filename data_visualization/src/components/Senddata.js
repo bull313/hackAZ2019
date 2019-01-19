@@ -3,73 +3,94 @@ import 'react-widgets/dist/css/react-widgets.css';
 import Widget from './Widget';
 import Dashboard from './Dashboard';
 import Header from './Header';
-import { getFrequencyData, sortDataByProp, filterData } from "./../data/data.js";
+import { getFrequencyData, sortDataByProp, filterData } from './../data/data.js';
+
+/*
+  Handles receiving data from Firebase
+*/
 class Senddata extends Component {
-  constructor(props){
+
+  /* Construct the state object to hold fetched data */
+  constructor(props) {
     super(props);
+
     this.state = {
-      data:[]
+      ethernet: [],
+      ip: [],
+      tcp: []
     };
-    this.refreshHandler = this.refreshHandler.bind(this);
-    //console.log(props);
-    /*var dab = this.props.db.database().ref('ip');
-    dab.push({
-
-        VERSION: '1',
-        TOS: '1',
-        TOTAL_LENGTH: '1',
-        IDENTIFICATION: '1',
-        FRAG_OFFSET: '1',
-        TTL: '2',
-        PROTOCOL: '1',
-        CHECKSUM: '1',
-        SRC_ADDR: '1',
-        DST_ADDR: '1',
-        TIME: '2'
-    });
-    dab = this.props.db.database().ref('tcp');
-    dab.push({
-
-      SRC_PORT: '1',
-      DST_PORT: '1',
-      SEQ_NUM: '1',
-      ACK_NUM: '1',
-      OFFSET_RESERVED: '1',
-      TCP_FLAG: '2',
-      WINDOW_SIZE: '1',
-      CHECKSUM: '1',
-      URGENT_PTR: '1'
-
-    });*/
   }
 
-  refreshHandler(){
-    console.log(this.state.data);
-  }
-  componentDidMount(){
-    //connecting to ethernet branch of database
-    const app = this.props.db.database().ref('/ethernet');
-    //pulling data from the database
+  componentDidMount() {
+    let app = null; /* Firebase data fetch reference */
+
+    /* Get the ethernet data */
+    app = this.props.db.database().ref('/ethernet');
     app.on('value', snapshot => {
-      var list = snapshot.val();
-      var newList = []
-      //console.log(list);
-      //for loop to put into temp array
-      for (let item in list){
-        newList.push({
-          DST_MAC: list[item].DST_MAC,
-          SRC_MAC: list[item].SRC_MAC,
-          ETH_PROTOCOL: list[item].ETH_PROTOCOL
+      var val = snapshot.val(); /* Holds the newly fetched data   */
+      var buffer = [];          /* Holds the data to put in state */
+
+      for (let item in val) {
+        buffer.push({
+          DST_MAC: val[item].DST_MAC,
+          SRC_MAC: val[item].SRC_MAC,
+          ETH_PROTOCOL: val[item].ETH_PROTOCOL
         });
       }
-      //console.log(newList);
-      //saving data to local state
-      console.log(getFrequencyData(newList, "DST_MAC"));
-      this.setState({data: newList});
+
+      this.setState({ethernet: buffer});
     });
 
-    //console.log(this.state.date);
+    /* Get the ip data */
+    app = this.props.db.database().ref('/ip');
+    app.on('value', snapshot => {
+      var val = snapshot.val(); /* Holds the newly fetched data   */
+      var buffer = [];          /* Holds the data to put in state */
+
+      for (let item in val) {
+        buffer.push({
+            VERSION:          val[item].VERSION,
+            TOS:              val[item].TOS,
+            TOTAL_LENGTH:     val[item].TOTAL_LENGTH,
+            IDENTIFICATION:   val[item].IDENTIFICATION,
+            FRAG_OFFSET:      val[item].FRAG_OFFSET,
+            TTL:              val[item].TTL,
+            PROTOCOL:         val[item].PROTOCOL,
+            CHECKSUM:         val[item].CHECKSUM,
+            SRC_ADDR:         val[item].SRC_ADDR,
+            DST_ADDR:         val[item].DST_ADDR,
+            TIME:             val[item].TIME
+        });
+      }
+
+      this.setState({ip: buffer});
+    });
+
+    /* Get the tcp data */
+    app = this.props.db.database().ref('/tcp');
+    app.on('value', snapshot => {
+      var val = snapshot.val(); /* Holds the newly fetched data   */
+      var buffer = [];          /* Holds the data to put in state */
+
+      for (let item in val) {
+        buffer.push({
+          SRC_PORT:         val[item].SRC_PORT,
+          DIST_PORT:        val[item].DIST_PORT,
+          SEQ_NUM:          val[item].SEQ_NUM,
+          ACK_NUM:          val[item].ACK_NUM,
+          OFFSET_RESERVED:  val[item].OFFSET_RESERVED,
+          TCP_FLAG:         val[item].TCP_FLAG,
+          WINDOW_SIZE:      val[item].WINDOW_SIZE,
+          CHECKSUM:         val[item].CHECKSUM,
+          URGENT_PTR:       val[item].URGENT_PTR,
+        });
+      }
+
+      this.setState({tcp: buffer});
+    });
   }
+
+  /* Render the UI components */
   render(){
 
     return (
