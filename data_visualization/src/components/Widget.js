@@ -2,14 +2,17 @@ import React, {Component} from 'react';
 import './css/Widget.css';
 import {Bar} from 'react-chartjs-2';
 
+/* Class Widget is going to be the boxed areas for each graph.*/
 class Widget extends Component{
 
+//Need to call super(props) to get values passed in from Senddata.js
   constructor(props){
     super(props);
   }
   render(){
-    console.log(this.props.data);
+    //using a temporary empty object for the charts data.
     var dat = {}
+    //checking to see what type of graph we need to execute.
     if(this.props.type == 'Bar'){
        dat = {
         chartData: {
@@ -27,6 +30,7 @@ class Widget extends Component{
         }
       }
     }
+    
     return(
       <div class='outershell'>
         {this.props.type == 'Bar' &&
