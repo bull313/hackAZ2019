@@ -1,2 +1,3 @@
-# hackAZ2019
-Hack AZ 2019 Project
+# Sniphy
+## A python tool and web application to visualize your network packets!
+### Hack Arizona 2019
