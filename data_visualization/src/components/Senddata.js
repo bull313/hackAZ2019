@@ -15,15 +15,22 @@ class Senddata extends Component {
     super(props);
 
     this.state = {
+      /* Store the unique source MAC addresses from each object type */
       uniqueMACAddresses: {
         ethernet: 0,
         ip: 0,
         tcp: 0
       },
 
-      ipAddresses: {},
-      tcpPorts: {},
-      
+      ipAddresses: {},  /* Store all unique IP source addresses and the number of occurences  */
+      tcpPorts: {},     /* Store all unique TCP source addresses and the number of occurences */
+
+      /* Store each object in order by time (for each object type) */
+      dataChronological: {
+        ethernet: [],
+        ip: [],
+        tcp: []
+      }
     };
   }
 
@@ -38,21 +45,26 @@ class Senddata extends Component {
 
       for (let item in val) {
         buffer.push({
-          DST_MAC: val[item].DST_MAC,
-          SRC_MAC: val[item].SRC_MAC,
-          ETH_PROTOCOL: val[item].ETH_PROTOCOL
+          DST_MAC:      val[item].DST_MAC,
+          SRC_MAC:      val[item].SRC_MAC,
+          ETH_PROTOCOL: val[item].ETH_PROTOCOL,
+          TIME:         val[item].TIME
         });
       }
 
+      /* Get all source addresses and their frequencies */
       let freqTable = getFrequencyData(buffer, "SRC_MAC");
-      let uniqueAddresses = [];
-      for (let addr in freqTable) {
-        uniqueAddresses.push(addr);
-      }
 
+      /* Store the number of addresses in each state */
       let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
-      uniqueMACAddresses.ethernet = uniqueAddresses.length;
+      uniqueMACAddresses.ethernet = Object.keys(freqTable).length;
       this.setState({ uniqueMACAddresses });
+
+      /* Sort the ethernet objects by time and store in state */
+      let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
+      let dataChronological = { ...this.state.dataChronological };
+      dataChronological.ethernet = sortedData;
+      this.setState({ dataChronological });
     });
 
     /* Get the ip data */
@@ -77,22 +89,26 @@ class Senddata extends Component {
         });
       }
 
+      /* Get all source addresses and their frequencies */
       let freqTable = getFrequencyData(buffer, "SRC_ADDR");
 
-      let uniqueAddresses = [];
-      for (let addr in freqTable) {
-        uniqueAddresses.push(addr);
-      }
-
+      /* Store the number of addresses in each state */
       let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
-      uniqueMACAddresses.ip = uniqueAddresses.length;
+      uniqueMACAddresses.ip = Object.keys(freqTable).length;
       this.setState({ uniqueMACAddresses });
 
+      /* Copy frequency table data into the state */
       let ipAddresses = { ...this.state.ipAddresses };
       for (let addr in freqTable) {
         ipAddresses[addr] = freqTable[addr];
       }
       this.setState({ ipAddresses });
+
+      /* Sort the IP address objects by time and store in state */
+      let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
+      let dataChronological = { ...this.state.dataChronological };
+      dataChronological.ip = sortedData;
+      this.setState({ dataChronological });
     });
 
     /* Get the tcp data */
@@ -115,21 +131,26 @@ class Senddata extends Component {
         });
       }
 
+      /* Get all source addresses and their frequencies */
       let freqTable = getFrequencyData(buffer, "SRC_PORT");
-      let uniqueAddresses = [];
-      for (let addr in freqTable) {
-        uniqueAddresses.push(addr);
-      }
 
+      /* Store the number of addresses in each state */
       let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
-      uniqueMACAddresses.tcp = uniqueAddresses.length;
+      uniqueMACAddresses.tcp = Object.keys(freqTable).length;
       this.setState({ uniqueMACAddresses });
 
+      /* Copy frequency table data into the state */
       let tcpPorts = { ...this.state.tcpPorts };
       for (let addr in freqTable) {
         tcpPorts[addr] = freqTable[addr];
       }
       this.setState({ tcpPorts });
+
+      /* Sort the TCP address objects by time and store in state */
+      let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
+      let dataChronological = { ...this.state.dataChronological };
+      dataChronological.tcp = sortedData;
+      this.setState({ dataChronological });
     });
   }
 
@@ -154,7 +175,7 @@ class Senddata extends Component {
         labels={Object.keys(this.state.tcpPorts)} data={Object.values(this.state.tcpPorts)} />
 
         <Widget type='Line' title='Network Usage'
-        labels={Object.keys(this.state.tcpPorts)} data={Object.values(this.state.tcpPorts)} />
+        labels={Object.keys(this.state.dataChronological)} data={Object.values(this.state.dataChronological)} />
       </div>
     )
   }

@@ -32,6 +32,7 @@ class Widget extends Component{
                  }
                  break;
       case 'Line':
+                  console.log(this.props.data);
                   dat = {
                    chartData: {
                      labels: this.props.labels,
