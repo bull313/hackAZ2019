@@ -1,0 +1,8 @@
+.dash{
+  position: absolute;
+  left: 0;
+  width:4rem;
+  display: inline-block;
+  background-color: #9A9898;
+  height: 20rem;
+}
