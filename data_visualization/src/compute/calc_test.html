@@ -32,77 +32,303 @@
       }
 
       function printResults(test, result) {
-        let resultsStr = `Testing ${test}: ${result}`;
-        let printElement = document.createElement("h1");
+          let resultsStr = `Testing ${test}: ${result}`;
+          let printElement = document.createElement("h1");
 
-        printElement.appendChild(document.createTextNode(resultsStr));
-        document.body.appendChild(printElement);
+          printElement.appendChild(document.createTextNode(resultsStr));
+          document.body.appendChild(printElement);
       }
 
       function validateEq(test, actual, expected) {
-        if (isEquivalent(actual, expected)) {
-          printResults(test, "PASS");
-        }
-        else {
-          printResults(test, "FAIL");
-          console.error(`FAIL TEST ${test}:\nActual:`);
-          console.log(actual);
-          console.error("Expected:");
-          console.log(expected);
-          console.log();
-        }
+          let equals = isEquivalent;
+
+          if (Array.isArray(actual) && Array.isArray(expected)) {
+              equals = (a, b) => {
+                  if (actual.length != expected.length)
+                      return false;
+
+                  for (let i = 0; i < actual.length; ++i)
+                      if (!isEquivalent(actual[i], expected[i]))
+                          return false;
+
+                  return true;
+              }
+          }
+
+          if (equals(actual, expected)) {
+              printResults(test, "PASS");
+          } else {
+              printResults(test, "FAIL");
+              console.error(`FAIL TEST ${test}:\nActual:`);
+              console.log(actual);
+              console.error("Expected:");
+              console.log(expected);
+              console.log();
+          }
       }
 
       window.onload = function() {
-        let testFrequencyData = [
-          {
-            "DST_MAC": "DABAD00",
-            "SRC_MAC": "BA5EBA11",
-            "ETH_PROTOCOL": "protocol"
-          },
-          {
-            "DST_MAC": "DABAD00",
-            "SRC_MAC": "BA5EBA11",
-            "ETH_PROTOCOL": "protocol"
-          },
-          {
-            "DST_MAC": "DABAD00",
-            "SRC_MAC": "BA5EBA11",
-            "ETH_PROTOCOL": "protocol"
-          },
-          {
-            "DST_MAC": "DABAD00",
-            "SRC_MAC": "BA5EBA11",
-            "ETH_PROTOCOL": "protocol"
-          },
-          {
-            "DST_MAC": "BA5EBA11",
-            "SRC_MAC": "DABAD00",
-            "ETH_PROTOCOL": "protocol"
-          },
-        ];
+          let testFrequencyData = [{
+                  "DST_MAC": "DABAD00",
+                  "SRC_MAC": "BA5EBA11",
+                  "ETH_PROTOCOL": "protocol"
+              },
+              {
+                  "DST_MAC": "DABAD00",
+                  "SRC_MAC": "BA5EBA11",
+                  "ETH_PROTOCOL": "protocol"
+              },
+              {
+                  "DST_MAC": "DABAD00",
+                  "SRC_MAC": "BA5EBA11",
+                  "ETH_PROTOCOL": "protocol"
+              },
+              {
+                  "DST_MAC": "DABAD00",
+                  "SRC_MAC": "BA5EBA11",
+                  "ETH_PROTOCOL": "protocol"
+              },
+              {
+                  "DST_MAC": "BA5EBA11",
+                  "SRC_MAC": "DABAD00",
+                  "ETH_PROTOCOL": "protocol"
+              },
+          ];
 
-        validateEq(
-          "Test frequency table generation for destination data",
-          getFrequencyData(testFrequencyData, "DST_MAC"),
-          {
-            "DABAD00": 4,
-            "BA5EBA11": 1
-          }
-        );
+          /* TESTS */
 
-        validateEq(
-          "Test frequency table generation for source data",
-          getFrequencyData(testFrequencyData, "SRC_MAC"),
-          {
-            "DABAD00": 1,
-            "BA5EBA11": 4
-          }
-        );
+          validateEq(
+              "Test frequency table generation for destination data",
+              getFrequencyData(testFrequencyData, "DST_MAC"), {
+                  "DABAD00": 4,
+                  "BA5EBA11": 1
+              }
+          );
+
+          validateEq(
+              "Test frequency table generation for source data",
+              getFrequencyData(testFrequencyData, "SRC_MAC"), {
+                  "DABAD00": 1,
+                  "BA5EBA11": 4
+              }
+          );
+
+          let testSortData = [{
+                  "VERSION": "0",
+                  "TOS": "0",
+                  "TOTAL_LENGTH": "4",
+                  "IDENTIFICATION": "0",
+                  "FRAG_OFFSET": "0",
+                  "TTL": "0",
+                  "PROTOCOL": "0",
+                  "CHECKSUM": "0",
+                  "SRC_ADDR": "0",
+                  "DST_ADDR": "0",
+                  "TIME": "70"
+              },
+              {
+                  "VERSION": "0",
+                  "TOS": "0",
+                  "TOTAL_LENGTH": "65",
+                  "IDENTIFICATION": "0",
+                  "FRAG_OFFSET": "0",
+                  "TTL": "0",
+                  "PROTOCOL": "0",
+                  "CHECKSUM": "0",
+                  "SRC_ADDR": "0",
+                  "DST_ADDR": "0",
+                  "TIME": "81"
+              },
+              {
+                  "VERSION": "0",
+                  "TOS": "0",
+                  "TOTAL_LENGTH": "41",
+                  "IDENTIFICATION": "0",
+                  "FRAG_OFFSET": "0",
+                  "TTL": "0",
+                  "PROTOCOL": "0",
+                  "CHECKSUM": "0",
+                  "SRC_ADDR": "0",
+                  "DST_ADDR": "0",
+                  "TIME": "24"
+              },
+              {
+                  "VERSION": "0",
+                  "TOS": "0",
+                  "TOTAL_LENGTH": "44",
+                  "IDENTIFICATION": "0",
+                  "FRAG_OFFSET": "0",
+                  "TTL": "0",
+                  "PROTOCOL": "0",
+                  "CHECKSUM": "0",
+                  "SRC_ADDR": "0",
+                  "DST_ADDR": "0",
+                  "TIME": "41"
+              },
+              {
+                  "VERSION": "0",
+                  "TOS": "0",
+                  "TOTAL_LENGTH": "61",
+                  "IDENTIFICATION": "0",
+                  "FRAG_OFFSET": "0",
+                  "TTL": "0",
+                  "PROTOCOL": "0",
+                  "CHECKSUM": "0",
+                  "SRC_ADDR": "0",
+                  "DST_ADDR": "0",
+                  "TIME": "68"
+              },
+          ];
+
+          validateEq(
+              "Test sorting data by TOTAL_LENGTH field",
+              sortDataByProp(testSortData, (a, b) => {
+                  return a["TOTAL_LENGTH"] - b["TOTAL_LENGTH"]
+              }),
+              [{
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "4",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "70"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "41",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "24"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "44",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "41"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "61",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "68"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "65",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "81"
+                  },
+              ]
+          );
+
+          validateEq(
+              "Test sorting data by TIME field",
+              sortDataByProp(testSortData, (a, b) => {
+                  return a["TIME"] - b["TIME"]
+              }),
+              [{
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "41",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "24"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "44",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "41"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "61",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "68"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "4",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "70"
+                  },
+                  {
+                      "VERSION": "0",
+                      "TOS": "0",
+                      "TOTAL_LENGTH": "65",
+                      "IDENTIFICATION": "0",
+                      "FRAG_OFFSET": "0",
+                      "TTL": "0",
+                      "PROTOCOL": "0",
+                      "CHECKSUM": "0",
+                      "SRC_ADDR": "0",
+                      "DST_ADDR": "0",
+                      "TIME": "81"
+                  },
+              ]
+          );
+
       };
     </script>
   </head>
   <body>
-
   </body>
 </html>
