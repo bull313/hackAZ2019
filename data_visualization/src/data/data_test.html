@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Test Calc Functions</title>
-    <script src="calc.js"></script>
+    <script src="data.js"></script>
     <script>
       function isEquivalent(a, b) {
           /* Create arrays of property names */
@@ -56,6 +56,34 @@
           }
 
           if (equals(actual, expected)) {
+              printResults(test, "PASS");
+          } else {
+              printResults(test, "FAIL");
+              console.error(`FAIL TEST ${test}:\nActual:`);
+              console.log(actual);
+              console.error("Expected:");
+              console.log(expected);
+              console.log();
+          }
+      }
+
+      function validateNeq(test, actual, expected) {
+          let equals = isEquivalent;
+
+          if (Array.isArray(actual) && Array.isArray(expected)) {
+              equals = (a, b) => {
+                  if (actual.length != expected.length)
+                      return false;
+
+                  for (let i = 0; i < actual.length; ++i)
+                      if (!isEquivalent(actual[i], expected[i]))
+                          return false;
+
+                  return true;
+              }
+          }
+
+          if (!equals(actual, expected)) {
               printResults(test, "PASS");
           } else {
               printResults(test, "FAIL");
@@ -441,7 +469,6 @@
                 }
               ]
           );
-
       };
     </script>
   </head>
