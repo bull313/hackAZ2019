@@ -127,9 +127,10 @@ class Senddata extends Component {
       <div>
         <Header/>
 
-        <Widget type='Bar' title='Number of Unique Source MAC Addresses'
+        <Widget type='Bar' purpose='unique' title='Number of Unique Source MAC Addresses'
         labels={Object.keys(this.state.uniqueMACAddresses)} data={Object.values(this.state.uniqueMACAddresses)}/>
-        <Widget/>
+        <Widget type='Bar' purpose='ipaddy' title='IP Addresses' labels={Object.keys(this.state.uniqueMACAddresses)}
+        data={Object.values(this.state.uniqueMACAddresses)}/>
       </div>
     )
   }

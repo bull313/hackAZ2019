@@ -9,19 +9,11 @@ class Widget extends Component{
   constructor(props){
     super(props);
   }
-<<<<<<< HEAD
   render(){
     //using a temporary empty object for the charts data.
     var dat = {}
     //checking to see what type of graph we need to execute.
     if(this.props.type == 'Bar'){
-=======
-
-  render() {
-    var dat = {};
-
-    if(this.props.type == 'Bar') {
->>>>>>> f194d082bc72566791fd66941f476ba074139790
        dat = {
         chartData: {
           labels: this.props.labels,
@@ -38,20 +30,16 @@ class Widget extends Component{
         }
       }
     }
-<<<<<<< HEAD
-    
-    return(
-=======
 
-    return (
->>>>>>> f194d082bc72566791fd66941f476ba074139790
+    return(
       <div class='outershell'>
         {this.props.type == 'Bar' &&
+        this.props.purpose == 'unique' &&
         <Bar data={dat.chartData} options={{
           maintainAspectRatio: false,
           title:{
             display: true,
-            text: 'Number of Unique Source MAC Addresses',
+            text: this.props.title,
             fontSize: 25
           },
           legend:{
@@ -67,6 +55,7 @@ class Widget extends Component{
             }
         }}/>
       }
+
       </div>
     );
   }
