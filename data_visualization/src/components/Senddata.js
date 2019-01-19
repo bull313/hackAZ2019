@@ -40,7 +40,12 @@ class Senddata extends Component {
         });
       }
 
-      this.setState({ethernet: buffer});
+      let calcBuffer = getFrequencyData(buffer, "SRC_MAC");
+      let freqData = [];
+      for (let addr in calcBuffer)
+        freqData.push(addr);
+
+      this.setState({ethernet: freqData});
     });
 
     console.log(this.state.ethernet);
@@ -67,7 +72,12 @@ class Senddata extends Component {
         });
       }
 
-      this.setState({ip: buffer});
+      let calcBuffer = getFrequencyData(buffer, "SRC_ADDR");
+      let freqData = [];
+      for (let addr in calcBuffer)
+        freqData.push(addr);
+
+      this.setState({ip: freqData});
     });
 
     /* Get the tcp data */
@@ -90,7 +100,12 @@ class Senddata extends Component {
         });
       }
 
-      this.setState({tcp: buffer});
+      let calcBuffer = getFrequencyData(buffer, "SRC_PORT");
+      let freqData = [];
+      for (let addr in calcBuffer)
+        freqData.push(addr);
+
+      this.setState({tcp: freqData});
     });
 
 
@@ -99,6 +114,11 @@ class Senddata extends Component {
 
   componentDidUpdate(){
 
+  }
+
+  /* Log the state data when it updates */
+  componentDidUpdate() {
+    console.log(this.state);
   }
 
   /* Render the UI components */
