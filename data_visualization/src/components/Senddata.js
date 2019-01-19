@@ -46,19 +46,23 @@ class Senddata extends Component {
     console.log(this.state.data);
   }
   componentDidMount(){
+    //connecting to ethernet branch of database
     const app = this.props.db.database().ref('/ethernet');
+    //pulling data from the database
     app.on('value', snapshot => {
       var list = snapshot.val();
       var newList = []
       //console.log(list);
+      //for loop to put into temp array
       for (let item in list){
         newList.push({
-          src: list[item].DST_MAC,
-          dest: list[item].SRC_MAC,
-          Eth: list[item].ETH_PROTOCOL
+          DST_MAC: list[item].DST_MAC,
+          SRC_MAC: list[item].SRC_MAC,
+          ETH_PROTOCOL: list[item].ETH_PROTOCOL
         });
       }
-      console.log(newList);
+      //console.log(newList);
+      //saving data to local state
       this.setState({data: newList});
     });
 
