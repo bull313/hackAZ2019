@@ -7,10 +7,11 @@ class Widget extends Component{
   constructor(props){
     super(props);
   }
-  render(){
-    console.log(this.props.data);
-    var dat = {}
-    if(this.props.type == 'Bar'){
+
+  render() {
+    var dat = {};
+
+    if(this.props.type == 'Bar') {
        dat = {
         chartData: {
           labels: this.props.labels,
@@ -27,7 +28,8 @@ class Widget extends Component{
         }
       }
     }
-    return(
+
+    return (
       <div class='outershell'>
         {this.props.type == 'Bar' &&
         <Bar data={dat.chartData} options={{

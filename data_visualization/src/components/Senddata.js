@@ -15,12 +15,12 @@ class Senddata extends Component {
     super(props);
 
     this.state = {
-      ethernet: [],
-      ip: [],
-      tcp: [],
-      data: []
+      uniqueMACAddresses: {
+        ethernet: 0,
+        ip: 0,
+        tcp: 0
+      }
     };
-
   }
 
   componentDidMount() {
@@ -40,16 +40,16 @@ class Senddata extends Component {
         });
       }
 
-      let calcBuffer = getFrequencyData(buffer, "SRC_MAC");
-      let freqData = [];
-      for (let addr in calcBuffer)
-        freqData.push(addr);
-      this.setState({ethernet: buffer,
-        data:[...this.state.data,freqData.length]});
+      let freqTable = getFrequencyData(buffer, "SRC_MAC");
+      let uniqueAddresses = [];
+      for (let addr in freqTable) {
+        uniqueAddresses.push(addr);
+      }
 
+      let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
+      uniqueMACAddresses.ethernet = uniqueAddresses.length;
+      this.setState({ uniqueMACAddresses });
     });
-
-
 
     /* Get the ip data */
     app = this.props.db.database().ref('/ip');
@@ -73,13 +73,15 @@ class Senddata extends Component {
         });
       }
 
-      let calcBuffer = getFrequencyData(buffer, "SRC_ADDR");
-      let freqData = [];
-      for (let addr in calcBuffer)
-        freqData.push(addr);
+      let freqTable = getFrequencyData(buffer, "SRC_ADDR");
+      let uniqueAddresses = [];
+      for (let addr in freqTable) {
+        uniqueAddresses.push(addr);
+      }
 
-      this.setState({ip: buffer,
-      data:[...this.state.data, freqData.length]});
+      let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
+      uniqueMACAddresses.ip = uniqueAddresses.length;
+      this.setState({ uniqueMACAddresses });
     });
 
     /* Get the tcp data */
@@ -101,32 +103,32 @@ class Senddata extends Component {
           URGENT_PTR:       val[item].URGENT_PTR,
         });
       }
-      let calcBuffer = getFrequencyData(buffer, "SRC_PORT");
-      let freqData = [];
-      for (let addr in calcBuffer)
-      freqData.push(addr);
-      this.setState({tcp: buffer,
-      data:[...this.state.data, freqData.length]});
 
+      let freqTable = getFrequencyData(buffer, "SRC_PORT");
+      let uniqueAddresses = [];
+      for (let addr in freqTable) {
+        uniqueAddresses.push(addr);
+      }
+
+      let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
+      uniqueMACAddresses.tcp = uniqueAddresses.length;
+      this.setState({ uniqueMACAddresses });
     });
-
-
-
   }
 
   componentDidUpdate(){
-    //console.log(this.state.data);
+    console.log("Senddata did update");
+    console.log(this.state);
   }
 
   /* Render the UI components */
   render(){
-    //console.log('data' + this.state.data);
     return (
       <div>
         <Header/>
 
-        <Widget type='Bar' title='Number of Unique Source MAC Addresses' data={this.state.data}
-        labels={['Ethernet', 'IP', 'TCP']}/>
+        <Widget type='Bar' title='Number of Unique Source MAC Addresses'
+        labels={Object.keys(this.state.uniqueMACAddresses)} data={Object.values(this.state.uniqueMACAddresses)}/>
         <Widget/>
       </div>
     )
