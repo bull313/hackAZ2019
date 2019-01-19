@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Test Calc Functions</title>
+    <script src="calc.js"></script>
+    <script>
+      function isEquivalent(a, b) {
+          /* Create arrays of property names */
+          var aProps = Object.getOwnPropertyNames(a);
+          var bProps = Object.getOwnPropertyNames(b);
+
+          /* If number of properties is different, */
+          /* objects are not equivalent */
+          if (aProps.length != bProps.length) {
+              return false;
+          }
+
+          for (var i = 0; i < aProps.length; i++) {
+              var propName = aProps[i];
+
+              /* If values of same property are not equal, */
+              /* objects are not equivalent */
+              if (a[propName] !== b[propName]) {
+                  return false;
+              }
+          }
+
+          /* If we made it this far, objects */
+          /* are considered equivalent */
+          return true;
+      }
+
+      function printResults(test, result) {
+        let resultsStr = `Testing ${test}: ${result}`;
+        let printElement = document.createElement("h1");
+
+        printElement.appendChild(document.createTextNode(resultsStr));
+        document.body.appendChild(printElement);
+      }
+
+      function validateEq(test, actual, expected) {
+        if (isEquivalent(actual, expected)) {
+          printResults(test, "PASS");
+        }
+        else {
+          printResults(test, "FAIL");
+          console.error(`FAIL TEST ${test}:\nActual:`);
+          console.log(actual);
+          console.error("Expected:");
+          console.log(expected);
+          console.log();
+        }
+      }
+
+      window.onload = function() {
+        let testFrequencyData = [
+          {
+            "DST_MAC": "DABAD00",
+            "SRC_MAC": "BA5EBA11",
+            "ETH_PROTOCOL": "protocol"
+          },
+          {
+            "DST_MAC": "DABAD00",
+            "SRC_MAC": "BA5EBA11",
+            "ETH_PROTOCOL": "protocol"
+          },
+          {
+            "DST_MAC": "DABAD00",
+            "SRC_MAC": "BA5EBA11",
+            "ETH_PROTOCOL": "protocol"
+          },
+          {
+            "DST_MAC": "DABAD00",
+            "SRC_MAC": "BA5EBA11",
+            "ETH_PROTOCOL": "protocol"
+          },
+          {
+            "DST_MAC": "BA5EBA11",
+            "SRC_MAC": "DABAD00",
+            "ETH_PROTOCOL": "protocol"
+          },
+        ];
+
+        validateEq(
+          "Test frequency table generation for destination data",
+          getFrequencyData(testFrequencyData, "DST_MAC"),
+          {
+            "DABAD00": 4,
+            "BA5EBA11": 1
+          }
+        );
+
+        validateEq(
+          "Test frequency table generation for source data",
+          getFrequencyData(testFrequencyData, "SRC_MAC"),
+          {
+            "DABAD00": 1,
+            "BA5EBA11": 4
+          }
+        );
+      };
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>
