@@ -26,11 +26,7 @@ class Senddata extends Component {
       tcpPorts: {},     /* Store all unique TCP source addresses and the number of occurences */
 
       /* Store each object in order by time (for each object type) */
-      dataChronological: {
-        ethernet: [],
-        ip: [],
-        tcp: []
-      }
+      dataChronological: {}
     };
   }
 
@@ -60,10 +56,32 @@ class Senddata extends Component {
       uniqueMACAddresses.ethernet = Object.keys(freqTable).length;
       this.setState({ uniqueMACAddresses });
 
-      /* Sort the ethernet objects by time and store in state */
+      /* Sort the ethernet objects by time */
       let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
+
+      /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      dataChronological.ethernet = sortedData;
+      const INTERVAL = 1; /* Interval to count packets at */
+
+      let timestamps = [];
+      for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
+
+      for (let i = 0; i < timestamps.length; ++i) {
+        if (timestamps[i] % INTERVAL == 0) {
+          let idx = timestamps[i] / INTERVAL;
+          if (!dataChronological[idx])
+            dataChronological[idx] = 0;
+          ++dataChronological[idx];
+        }
+        else {
+          let idx = Math.floor(timestamps[i] / INTERVAL) + 1;
+          if (!dataChronological[idx])
+            dataChronological[idx] = 0;
+          ++dataChronological[idx];
+        }
+      }
+
+      /* Store the packet counts into state */
       this.setState({ dataChronological });
     });
 
@@ -104,10 +122,32 @@ class Senddata extends Component {
       }
       this.setState({ ipAddresses });
 
-      /* Sort the IP address objects by time and store in state */
+      /* Sort the IP objects by time */
       let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
+
+      /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      dataChronological.ip = sortedData;
+      const INTERVAL = 1; /* Interval to count packets at */
+
+      let timestamps = [];
+      for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
+
+      for (let i = 0; i < timestamps.length; ++i) {
+        if (timestamps[i] % INTERVAL == 0) {
+          let idx = timestamps[i] / INTERVAL;
+          if (!dataChronological[idx])
+            dataChronological[idx] = 0;
+          ++dataChronological[idx];
+        }
+        else {
+          let idx = Math.floor(timestamps[i] / INTERVAL) + 1;
+          if (!dataChronological[idx])
+            dataChronological[idx] = 0;
+          ++dataChronological[idx];
+        }
+      }
+
+      /* Store the packet counts into state */
       this.setState({ dataChronological });
     });
 
@@ -128,6 +168,7 @@ class Senddata extends Component {
           WINDOW_SIZE:      val[item].WINDOW_SIZE,
           CHECKSUM:         val[item].CHECKSUM,
           URGENT_PTR:       val[item].URGENT_PTR,
+          TIME:             val[item].TIME
         });
       }
 
@@ -146,16 +187,38 @@ class Senddata extends Component {
       }
       this.setState({ tcpPorts });
 
-      /* Sort the TCP address objects by time and store in state */
+      /* Sort the TCP objects by time */
       let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
+
+      /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      dataChronological.tcp = sortedData;
+      const INTERVAL = 1; /* Interval to count packets at */
+
+      let timestamps = [];
+      for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
+
+      for (let i = 0; i < timestamps.length; ++i) {
+        if (timestamps[i] % INTERVAL == 0) {
+          let idx = timestamps[i] / INTERVAL;
+          if (!dataChronological[idx])
+            dataChronological[idx] = 0;
+          ++dataChronological[idx];
+        }
+        else {
+          let idx = Math.floor(timestamps[i] / INTERVAL) + 1;
+          if (!dataChronological[idx])
+            dataChronological[idx] = 0;
+          ++dataChronological[idx];
+        }
+      }
+
+      /* Store the packet counts into state */
       this.setState({ dataChronological });
     });
   }
 
   componentDidUpdate(){
-    console.log("Senddata did update");
+    console.log("Senddata updated");
     console.log(this.state);
   }
 
@@ -174,8 +237,9 @@ class Senddata extends Component {
         <Widget type='Bar' title='TCP Port and Their Frequencies'
         labels={Object.keys(this.state.tcpPorts)} data={Object.values(this.state.tcpPorts)} />
 
-        <Widget type='Line' title='Network Usage'
+        <Widget type='Line' title='Packet occurences by time frame'
         labels={Object.keys(this.state.dataChronological)} data={Object.values(this.state.dataChronological)} />
+
       </div>
     )
   }

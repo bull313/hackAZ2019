@@ -32,7 +32,7 @@ class Widget extends Component{
                  }
                  break;
       case 'Line':
-                  console.log(this.props.data);
+                  //console.log(this.props.data);
                   dat = {
                    chartData: {
                      labels: this.props.labels,
@@ -41,7 +41,8 @@ class Widget extends Component{
                        data: this.props.data,
                        backgroundColor:[
                          'rgb(205, 94, 94)'
-                       ]
+                       ],
+                       pointBackgroundColor: 'rgb(0, 195, 121)'
                      }]
 
                    }
@@ -101,7 +102,15 @@ class Widget extends Component{
           },
           legend:{
             display: false
-          }
+          },
+          scales: {
+                yAxes : [{
+                    ticks : {
+                        suggestedMax : 10,
+                        suggestedMin : 0
+                    }
+                }]
+            }
         }}/>
       }
       </div>
