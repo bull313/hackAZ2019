@@ -3,6 +3,7 @@ import 'react-widgets/dist/css/react-widgets.css';
 import Widget from './Widget';
 import Dashboard from './Dashboard';
 import Header from './Header';
+import {filterData} from "./../data/data.js";
 class Senddata extends Component {
   constructor(props){
     super(props);
@@ -63,6 +64,7 @@ class Senddata extends Component {
       }
       //console.log(newList);
       //saving data to local state
+      console.log(getFrequencyData(newList, "DST_MAC"));
       this.setState({data: newList});
     });
 
