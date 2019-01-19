@@ -1,22 +1,29 @@
 /*
-	Calculate the frequency of each unique MAC address for a given
-	address type (i.e. source, destination) given a list of ethernet
-	frame objects
+	Given a list of objects, return a dictionary containing each unique value
+	of a given property paired with the number of occurences of that value (its frequency)
 */
-function getFrequencyData(ethFrameList, addressType) {
+function getFrequencyData(objectList, property) {
 	let table = {}; /* Table of address->frequency data to return */
 
 	/*
 		For each frame, increment the frequency
 		or create a new object if it doesn't exist
 	*/
-	for (let i = 0; i < ethFrameList.length; ++i) {
-		let nextAddress = ethFrameList[i][addressType];
-		if (table[nextAddress]) {
-			table[nextAddress]++;
+	for (let i = 0; i < objectList.length; ++i) {
+		let nextObj = objectList[i][property];
+
+		if (nextObj == undefined) {
+
+			/* Object property doesn't exist. Cannot generate a table in this case */
+			return null;
+
+		}
+
+		if (table[nextObj]) {
+			table[nextObj]++;
 		}
 		else {
-			table[nextAddress] = 1;
+			table[nextObj] = 1;
 		}
 	}
 
