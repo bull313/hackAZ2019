@@ -3,49 +3,19 @@ import 'react-widgets/dist/css/react-widgets.css';
 import Widget from './Widget';
 import Dashboard from './Dashboard';
 import Header from './Header';
+import {getFrequencyData} from './../compute/calc.js';
 class Senddata extends Component {
   constructor(props){
     super(props);
     this.state = {
-      data:[]
+      data:[],
+      dt: []
     };
-    this.refreshHandler = this.refreshHandler.bind(this);
-    //console.log(props);
-    /*var dab = this.props.db.database().ref('ip');
-    dab.push({
-
-        VERSION: '1',
-        TOS: '1',
-        TOTAL_LENGTH: '1',
-        IDENTIFICATION: '1',
-        FRAG_OFFSET: '1',
-        TTL: '2',
-        PROTOCOL: '1',
-        CHECKSUM: '1',
-        SRC_ADDR: '1',
-        DST_ADDR: '1',
-        TIME: '2'
-    });
-    dab = this.props.db.database().ref('tcp');
-    dab.push({
-
-      SRC_PORT: '1',
-      DST_PORT: '1',
-      SEQ_NUM: '1',
-      ACK_NUM: '1',
-      OFFSET_RESERVED: '1',
-      TCP_FLAG: '2',
-      WINDOW_SIZE: '1',
-      CHECKSUM: '1',
-      URGENT_PTR: '1'
-
-    });*/
+    this.autoUpdate = this.autoUpdate.bind(this);
+    this.autoUpdate();
   }
 
-  refreshHandler(){
-    console.log(this.state.data);
-  }
-  componentDidMount(){
+  autoUpdate(){
     //connecting to ethernet branch of database
     const app = this.props.db.database().ref('/ethernet');
     //pulling data from the database
@@ -64,17 +34,25 @@ class Senddata extends Component {
       //console.log(newList);
       //saving data to local state
       this.setState({data: newList});
+      var eth_count = getFrequencyData(newList, 'SRC_MAC');
+      //console.log(getFrequencyData(newList, 'SRC_MAC'));
+      this.setState({dt:[eth_count]});
+      console.log(eth_count);
     });
 
     //console.log(this.state.date);
+  }
+  componentDidMount(){
+      console.log(this.state.dt);
   }
   render(){
 
     return (
       <div>
         <Header/>
-        <Dashboard/>
-        <Widget/>
+
+        <Widget type='Bar' title='Number of Unique Source MAC Addresses' /*data={this.state.dt}*/
+        labels={['Ethernet', 'IP', 'TCP']}/>
         <Widget/>
         <Widget/>
         <Widget/>

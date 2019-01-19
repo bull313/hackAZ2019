@@ -2,7 +2,7 @@
 	Given a list of objects, return a dictionary containing each unique value
 	of a given property paired with the number of occurences of that value (its frequency)
 */
-export function getFrequencyData(data, property) {
+export const getFrequencyData = (data, property) => {
     let table = {}; /* Table of address->frequency data to return */
 
     /*
@@ -34,7 +34,7 @@ export function getFrequencyData(data, property) {
 	Return a sorted version of a data set based off of a comparison function.
 	Sorting is done with MergeSort algorithm
 */
-export function sortDataByProp(data, comp) {
+export const sortDataByProp = (data, comp) => {
     /* Merge function to complete the Merge Sort sorting algorithm */
     let merge = (left, right, comp) => {
         let result = [],
@@ -66,7 +66,7 @@ export function sortDataByProp(data, comp) {
 /*
 	Return all items in the given data set that have the specified value set for the specified key
 */
-export function filterData(data, key, value) {
+export const filterData = (data, key, value) => {
     let filteredData = [];
 
     /* Only add item to filteredData if the item has the specified value at the specified key */
