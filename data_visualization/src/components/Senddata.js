@@ -19,7 +19,11 @@ class Senddata extends Component {
         ethernet: 0,
         ip: 0,
         tcp: 0
-      }
+      },
+
+      ipAddresses: {},
+      tcpPorts: {},
+      
     };
   }
 
@@ -74,6 +78,7 @@ class Senddata extends Component {
       }
 
       let freqTable = getFrequencyData(buffer, "SRC_ADDR");
+
       let uniqueAddresses = [];
       for (let addr in freqTable) {
         uniqueAddresses.push(addr);
@@ -82,6 +87,12 @@ class Senddata extends Component {
       let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
       uniqueMACAddresses.ip = uniqueAddresses.length;
       this.setState({ uniqueMACAddresses });
+
+      let ipAddresses = { ...this.state.ipAddresses };
+      for (let addr in freqTable) {
+        ipAddresses[addr] = freqTable[addr];
+      }
+      this.setState({ ipAddresses });
     });
 
     /* Get the tcp data */
@@ -113,6 +124,12 @@ class Senddata extends Component {
       let uniqueMACAddresses = { ...this.state.uniqueMACAddresses };
       uniqueMACAddresses.tcp = uniqueAddresses.length;
       this.setState({ uniqueMACAddresses });
+
+      let tcpPorts = { ...this.state.tcpPorts };
+      for (let addr in freqTable) {
+        tcpPorts[addr] = freqTable[addr];
+      }
+      this.setState({ tcpPorts });
     });
   }
 
@@ -127,10 +144,17 @@ class Senddata extends Component {
       <div>
         <Header/>
 
-        <Widget type='Bar' purpose='unique' title='Number of Unique Source MAC Addresses'
-        labels={Object.keys(this.state.uniqueMACAddresses)} data={Object.values(this.state.uniqueMACAddresses)}/>
-        <Widget type='Bar' purpose='ipaddy' title='IP Addresses' labels={Object.keys(this.state.uniqueMACAddresses)}
-        data={Object.values(this.state.uniqueMACAddresses)}/>
+        <Widget type='Bar' title='Number of Unique Source MAC Addresses'
+        labels={Object.keys(this.state.uniqueMACAddresses)} data={Object.values(this.state.uniqueMACAddresses)} />
+
+        <Widget type='Bar' title='IP Addresses and Their Frequencies'
+        labels={Object.keys(this.state.ipAddresses)} data={Object.values(this.state.ipAddresses)} />
+
+        <Widget type='Bar' title='TCP Port and Their Frequencies'
+        labels={Object.keys(this.state.tcpPorts)} data={Object.values(this.state.tcpPorts)} />
+
+        <Widget type='Line' title='Network Usage'
+        labels={Object.keys(this.state.tcpPorts)} data={Object.values(this.state.tcpPorts)} />
       </div>
     )
   }
