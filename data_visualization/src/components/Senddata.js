@@ -34,7 +34,7 @@ class Senddata extends Component {
     let app = null; /* Firebase data fetch reference */
 
     /* Create a blank chronological dates object */
-    const ELAPSED_SECONDS = 6 * 3600; /* Get packets since the last X seconds */
+    const ELAPSED_SECONDS = 420; /* Get packets since the last X seconds */
     const INTERVAL = 1; /* Interval to count packets at */
     let currentDate = new Date();
     let pastDate = new Date();
@@ -50,7 +50,7 @@ class Senddata extends Component {
     console.log(dataChronological);
 
     /* Get the ethernet data */
-    app = this.props.db.database().ref('/ethernet_real');
+    app = this.props.db.database().ref('/ethernet');
     app.on('value', snapshot => {
       var val = snapshot.val(); /* Holds the newly fetched data   */
       var buffer = [];          /* Holds the data to put in state */
@@ -106,7 +106,7 @@ class Senddata extends Component {
     });
 
     /* Get the ip data */
-    app = this.props.db.database().ref('/ip_real');
+    app = this.props.db.database().ref('/ip');
     app.on('value', snapshot => {
       var val = snapshot.val(); /* Holds the newly fetched data   */
       var buffer = [];          /* Holds the data to put in state */
@@ -173,7 +173,7 @@ class Senddata extends Component {
     });
 
     /* Get the tcp data */
-    app = this.props.db.database().ref('/tcp_real');
+    app = this.props.db.database().ref('/tcp');
     app.on('value', snapshot => {
       var val = snapshot.val(); /* Holds the newly fetched data   */
       var buffer = [];          /* Holds the data to put in state */
