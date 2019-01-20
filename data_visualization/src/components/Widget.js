@@ -50,13 +50,10 @@ class Widget extends Component{
                   var seconds = this.props.labels[0] %60;
                   hours = hours % 24;
                   let time = hours + ' ' + minutes + ' ' + seconds;
-                  console.log(hours);
                   //newData.push(this.props.labels[1] - this.props.labels[0]);
-                  console.log(this.props.labels);
                   for(let i = 1; i < this.props.labels.length; i++){
                     newData.push(this.props.labels[i] - this.props.labels[i-1])
                   }
-                  console.log(newData);
                   for(let i = 1; i < newData.length; i++){
                     graphData.push(newData[i] + graphData[i-1]);
                   }
