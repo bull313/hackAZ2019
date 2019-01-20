@@ -226,8 +226,7 @@ class Senddata extends Component {
   render(){
     return (
       <div>
-        <Header/>
-
+        
         <Widget type='Bar' title='Number of Unique Source MAC Addresses'
         labels={Object.keys(this.state.uniqueMACAddresses)} data={Object.values(this.state.uniqueMACAddresses)} />
 

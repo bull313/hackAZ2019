@@ -7,7 +7,7 @@ class Dashboard extends Component {
   render(){
     return(
       <div class='dash'>
-        <barChart/>
+        hello
       </div>
     );
   }

@@ -1,5 +1,39 @@
 .header{
   height: 5rem;
   display: block;
-  background-color: #9A9898;
+  background-color: #6600CC;
+}
+
+
+nav{
+  height: 5rem;
+}
+ul{
+  height: 5rem;
+}
+li{
+  height: 5rem;
+  width: 8rem;
+
+  color: White;
+  font-weight: bold;
+  font-size: 20px;
+  font-family: 'Arial';
+
+}
+a.nav-link{
+  margin-top: 20px;
+}
+
+.home{
+  position: absolute;
+  right: 25%;
+}
+.view{
+  position: absolute;
+  right: 15%
+}
+
+#brand{
+  font-size: 30px;
 }
