@@ -10,6 +10,19 @@ import signal
 import pyrebase
 import time
 import ast
+import getpass
+
+stop = False
+
+#
+# Signal Handlers
+#
+
+def sig_handler(sig, frame):
+	print("Stopping packet capture...")
+	global stop
+	stop = True
+
 
 #
 # Packet Parsing
@@ -87,102 +100,112 @@ class capture:
 # Packet Sniffing
 #
 
-# If OS is Windows
-if os.name == "nt":
-	s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
-	# bind to your IP
-	s.bind(("10.143.150.54", 0))
-	s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
-	s.ioctl(socket.SIO_RCVCALL, socket.RCVCALL_ON)
+def sniff():
+	# If OS is Windows
+	if os.name == "nt":
+		s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
+		# bind to your IP
+		s.bind(("10.143.150.54", 0))
+		s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+		s.ioctl(socket.SIO_RCVCALL, socket.RCVCALL_ON)
 
-# If OS is *nix
-else:
-	s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0800))
+	# If OS is *nix
+	else:
+		s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0800))
 
-s.setblocking(0)
+	s.setblocking(0)
+	signal.signal(signal.SIGINT, sig_handler)
 
-# Signal handlers
-def sig_handler(sig, frame):
-	print("Stopping packet capture...")
-	global stop
-	stop = True
+	f = open("my_packets", "w")
 
-signal.signal(signal.SIGINT, sig_handler)
-signal.signal(signal.SIGTERM, sig_handler)
+	print("Starting packet capture...")
 
-f = open("my_packets", "w")
+	# Loop to read packets
+	while True:
+		global stop	
+		readable, writable, exceptional = select.select([s], [], [], 0)
 
-stop = False
+		if readable:
+			timestamp = time.time()
+			pkt = s.recvfrom(65535)
 
-print("Starting packet capture...")
+			cap = capture()
 
-# Loop to read packets
-while True:	
-	readable, writable, exceptional = select.select([s], [], [], 0)
+			eth = cap.parse_eth_header(pkt[0][0:14])
+			eth.update({"TIMESTAMP": timestamp})
+			ip = cap.parse_ip_header(pkt[0][14:34])
+			ip.update({"TIMESTAMP": timestamp})
+			tcp = cap.parse_tcp_header(pkt[0][34:54])
+			tcp.update({"TIMESTAMP": timestamp})
 
-	if readable:
-		timestamp = time.time()
-		pkt = s.recvfrom(65535)
+			print("Ethernet: " + str(eth))
+			print("IP: " + str(ip))
+			print("TCP: " + str(tcp) + "\n")
 
-		cap = capture()
-
-		eth = cap.parse_eth_header(pkt[0][0:14])
-		eth.update({"TIMESTAMP": timestamp})
-		ip = cap.parse_ip_header(pkt[0][14:34])
-		ip.update({"TIMESTAMP": timestamp})
-		tcp = cap.parse_tcp_header(pkt[0][34:54])
-		tcp.update({"TIMESTAMP": timestamp})
-
-		print("Ethernet: " + str(eth))
-		print("IP: " + str(ip))
-		print("TCP: " + str(tcp) + "\n")
-
-		f.write("\n" + json.dumps(eth) + "\n" + json.dumps(ip) + "\n" + json.dumps(tcp) + "\n")
+			f.write("\n" + json.dumps(eth) + "\n" + json.dumps(ip) + "\n" + json.dumps(tcp) + "\n")
 	
-	if stop:
-		f.close()
-		break
+		if stop:
+			f.close()
+			break
+
+	signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
 #
 # Upload to Firebase
 #
-'''
-print("Uploading data to Firebase")
 
-# TODO: Plug in Firebase Auth info
+def fb_upload(credentials):
+	fb_auth = open("ignoreme.json", "r")
+	auth_data = json.load(fb_auth)
+
+	config = {"apiKey": auth_data["apiKey"],
+			"authDomain": auth_data["authDomain"],
+			"databaseURL": auth_data["databaseURL"],
+			"storageBucket": auth_data["storageBucket"]
+			}
+
+	firebase = pyrebase.initialize_app(config)
+	auth = firebase.auth()
+	try:
+		if(credentials):
+			user = auth.sign_in_with_email_and_password(credentials["email"], credentials["password"])
+		else:
+			print("Email: ", end='')
+			em = input()
+			pw = getpass.getpass()
+			user = auth.sign_in_with_email_and_password(em, pw)
+
+		db = firebase.database()
+
+		print("Uploading data to Firebase...")
+
+		# Read data from local text file
+		f = open("my_packets", "r")
+
+		while f.readline():
+			eth = json.loads(f.readline())
+			ip = json.loads(f.readline())
+			tcp = json.loads(f.readline())
+
+			db.child("ethernet").push(eth, user["idToken"])
+			db.child("ip").push(ip, user["idToken"])
+			db.child("tcp").push(tcp, user["idToken"])
 
 
-config = {"apiKey":
-		"authDomain":
-		"databaseURL":
-		"storageBucket":
-		"serviceAccount":
-		}
-
-firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
-user = auth.sign_in_with_email_and_password("", "")
-db = firebase.database()
-'''
-# Read data from local text file
-f = open("my_packets", "r")
-
-while f.readline():
-	eth = json.loads(f.readline())
-	ip = json.loads(f.readline())
-	tcp = json.loads(f.readline())
-
-	#print(eth)
-	#print(ip)
-	#print(tcp)
-	#print()
-
-	# TODO: Write JSON data to Firebase
-	db.child("eth_test").push(eth)
-	db.child("ip_test").push(ip)
-	db.child("tcp_test").push(tcp)
+		f.close()
+	except:
+		print("Login Failed, no data uploaded...")
 
 
-f.close()
+#
+# Main function
+#
+
+def main():
+	# TODO: implement command-line options
+	sniff()
+	fb_upload(None)
+
+main()
 
