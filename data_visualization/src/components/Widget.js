@@ -33,6 +33,18 @@ class Widget extends Component{
                          'rgb(61, 195, 121)',
                          'rgb(200, 94, 94)',
                          'rgb(61, 112, 111)',
+                         'rgb(81, 175, 121)',
+                         'rgb(235, 94, 94)',
+                         'rgb(76, 42, 195)',
+                         'rgb(31, 195, 121)',
+                         'rgb(201, 44, 94)',
+                         'rgb(79, 112, 195)',
+                         'rgb(80, 125, 121)',
+                         'rgb(105, 04, 44)',
+                         'rgb(51, 162, 195)',
+                         'rgb(61, 195, 121)',
+                         'rgb(200, 94, 94)',
+                         'rgb(61, 112, 111)',
                          'rgb(81, 175, 121)'
                        ]
                      }]
@@ -42,27 +54,13 @@ class Widget extends Component{
                  break;
       case 'Line':
                   //console.log(this.props.data);
-                  //console.log(this.props.labels[0]);
-                  let newData = [0];
-                  let graphData =[0];
-                  var hours = this.props.labels[0] % 3600;
-                  var minutes = (this.props.labels[0] % 3600) / 60;
-                  var seconds = this.props.labels[0] %60;
-                  hours = hours % 24;
-                  let time = hours + ' ' + minutes + ' ' + seconds;
-                  console.log(hours);
-                  //newData.push(this.props.labels[1] - this.props.labels[0]);
-                  console.log(this.props.labels);
-                  for(let i = 1; i < this.props.labels.length; i++){
-                    newData.push(this.props.labels[i] - this.props.labels[i-1])
-                  }
-                  console.log(newData);
-                  for(let i = 1; i < newData.length; i++){
+
+                  /*for(let i = 1; i < newData.length; i++){
                     graphData.push(newData[i] + graphData[i-1]);
-                  }
+                  }*/
                   dat = {
                    chartData: {
-                     labels: graphData,
+                     labels: this.props.labels,
                      datasets: [{
                        label: this.props.title,
                        data: this.props.data,
@@ -142,6 +140,15 @@ class Widget extends Component{
                         suggestedMax : 10,
                         suggestedMin : 0
                     }
+                }],
+                xAxes : [{
+                  display: true,
+                  ticks:{
+                    beginAtZero: false,
+                    steps: 30,
+                    stepValue: 1,
+                    max: 30
+                  }
                 }]
             }
         }}/>
