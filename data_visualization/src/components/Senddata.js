@@ -194,7 +194,7 @@ class Senddata extends Component {
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
       const INTERVAL = .01; /* Interval to count packets at */
-      
+
       let timestamps = [];
       for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
 
@@ -215,7 +215,7 @@ class Senddata extends Component {
 
       }
 
-
+      console.log(dataChronological);
       /* Store the packet counts into state */
       this.setState({ dataChronological });
     });

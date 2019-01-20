@@ -24,7 +24,16 @@ class Widget extends Component{
                        backgroundColor:[
                          'rgb(205, 94, 94)',
                          'rgb(71, 162, 195)',
-                         'rgb(71, 195, 121)'
+                         'rgb(71, 195, 121)',
+                         'rgb(201, 44, 94)',
+                         'rgb(79, 112, 195)',
+                         'rgb(80, 125, 121)',
+                         'rgb(105, 04, 44)',
+                         'rgb(51, 162, 195)',
+                         'rgb(61, 195, 121)',
+                         'rgb(200, 94, 94)',
+                         'rgb(61, 112, 111)',
+                         'rgb(81, 175, 121)'
                        ]
                      }]
 
@@ -43,7 +52,7 @@ class Widget extends Component{
                   let time = hours + ' ' + minutes + ' ' + seconds;
                   console.log(hours);
                   //newData.push(this.props.labels[1] - this.props.labels[0]);
-                  console.log(newData);
+                  console.log(this.props.labels);
                   for(let i = 1; i < this.props.labels.length; i++){
                     newData.push(this.props.labels[i] - this.props.labels[i-1])
                   }
@@ -87,6 +96,7 @@ class Widget extends Component{
       }
     }*/
 
+
     return(
       <div class='outershell'>
         { this.props.type == 'Bar' &&
@@ -95,7 +105,7 @@ class Widget extends Component{
           title:{
             display: true,
             text: this.props.title,
-            fontSize: 25
+            fontSize: 20
           },
           legend:{
             display: false
@@ -106,6 +116,11 @@ class Widget extends Component{
                         suggestedMax : 5,
                         suggestedMin : 0
                     }
+                }],
+                xAxes:[{
+                  ticks:{
+                    fontSize: 13.125
+                  }
                 }]
             }
         }}/>
