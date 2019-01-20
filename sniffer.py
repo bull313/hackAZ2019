@@ -35,7 +35,7 @@ def mac_format(mac_bytes):
 
 # Signal Handler
 def sig_handler(sig, frame):
-	print("Stopping packet capture...")
+	print()
 	global stop
 	stop = True
 
@@ -126,7 +126,7 @@ def sniff(timeout = None, verbosity = None):
 
 	# If OS is *nix
 	else:
-		s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0800))
+		s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
 
 	# Set nonblocking capture and interrupt signal handler
 	s.setblocking(0)
@@ -140,7 +140,7 @@ def sniff(timeout = None, verbosity = None):
 	# Loop to capture packets
 	while True:
 		global stop	
-		readable, writable, exceptional = select.select([s], [], [], 0)
+		readable, writable, exceptional = select.select([s], [s], [], 0)
 
 		timestamp = time.time()
 
@@ -167,7 +167,7 @@ def sniff(timeout = None, verbosity = None):
 				pass
 
 			else:
-				print("Packet from %s to %s" % (ip["SRC_ADDR"], ip["DST_ADDR"]))
+				print("Packet: %s : %s -> %s : %s" % (ip["SRC_ADDR"].rjust(15), str(tcp["SRC_PORT"]).ljust(5), ip["DST_ADDR"].rjust(15), str(tcp["DST_PORT"]).ljust(5)))
 
 			f.write("\n" + json.dumps(eth) + "\n" + json.dumps(ip) + "\n" + json.dumps(tcp) + "\n")
 
@@ -175,6 +175,8 @@ def sniff(timeout = None, verbosity = None):
 		if stop or (timeout and (timestamp - start) > timeout):
 			f.close()
 			break
+
+	print("Stopping packet capture...")
 
 	# Reset to default signal handler
 	signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -184,7 +186,7 @@ def sniff(timeout = None, verbosity = None):
 # Upload to Firebase
 #
 
-def fb_upload(credentials = None):
+def fb_upload(file = None, credentials = None):
 	fb_auth = open("ignoreme.json", "r")
 	auth_data = json.load(fb_auth)
 
@@ -213,9 +215,9 @@ def fb_upload(credentials = None):
 			ip = json.loads(f.readline())
 			tcp = json.loads(f.readline())
 
-			db.child("ethernet_real").push(eth, user["idToken"])
-			db.child("ip_real").push(ip, user["idToken"])
-			db.child("tcp_real").push(tcp, user["idToken"])
+			db.child("ethernet").push(eth, user["idToken"])
+			db.child("ip").push(ip, user["idToken"])
+			db.child("tcp").push(tcp, user["idToken"])
 
 		f.close()
 
@@ -228,8 +230,12 @@ def fb_upload(credentials = None):
 # Create Firebase User
 #
 
-def fb_register():
-	fb_auth = open("ignoreme.json", "r")
+def fb_register(file = None):
+	if file:
+		fb_auth = open(file, "r")
+	else:
+		fb_auth = open("ignoreme.json", "r")
+
 	auth_data = json.load(fb_auth)
 
 	config = {"apiKey": auth_data["apiKey"],
@@ -259,6 +265,7 @@ def main():
 	parser = argparse.ArgumentParser(description="Capture Ethernet Frames, IP Packets, and TCP Segments")
 	parser.add_argument("-r", "--register", action="store_true", help="Register a new user for the database")
 	parser.add_argument("-t", "--timeout", type=int, metavar="", help="Specify how long to capture packets (in seconds)")
+	parser.add_argument("-f", "--file", metavar="", help="Specify Firebase API file to use")
 	upl = parser.add_mutually_exclusive_group()
 	upl.add_argument("-n", "--no-upload", action="store_true", help="Do not upload packets to Firebase")
 	upl.add_argument("-U", "--upload-only", action="store_true", help="Upload current log without capturing")
@@ -268,7 +275,7 @@ def main():
 	args = parser.parse_args()
 
 	if args.register:
-		fb_register()
+		fb_register(args.file)
 		exit(0)
 
 	if not args.upload_only:
@@ -282,7 +289,7 @@ def main():
 		sniff(args.timeout, verbosity)
 
 	if not args.no_upload:
-		fb_upload(None)
+		fb_upload(args.file)
 
 main()
 
