@@ -46,9 +46,6 @@ class Senddata extends Component {
 
     this.setState({ dataChronological });
 
-    console.log("data chron");
-    console.log(dataChronological);
-
     /* Get the ethernet data */
     app = this.props.db.database().ref('/ethernet_real');
     app.on('value', snapshot => {
@@ -79,7 +76,6 @@ class Senddata extends Component {
       let dataChronological = { ...this.state.dataChronological };
 
       let timestamps = [];
-      console.log("past date");
       for (let item in sortedData) {
         timestamps.push(Math.abs(parseFloat(sortedData[item].TIME) - (pastDate.getTime() / 1000)));
       }
@@ -210,7 +206,6 @@ class Senddata extends Component {
 
       /* Sort the TCP objects by time */
       let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
-
 
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
