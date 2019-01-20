@@ -33,6 +33,22 @@ class Senddata extends Component {
   componentDidMount() {
     let app = null; /* Firebase data fetch reference */
 
+    /* Create a blank chronological dates object */
+    const ELAPSED_SECONDS = 6 * 3600; /* Get packets since the last X seconds */
+    const INTERVAL = 1; /* Interval to count packets at */
+    let currentDate = new Date();
+    let pastDate = new Date();
+    pastDate.setSeconds(currentDate.getSeconds() - ELAPSED_SECONDS);
+
+    let dataChronological = { ...this.state.dataChronological };
+    for (let i = INTERVAL; i < INTERVAL * ELAPSED_SECONDS; ++i)
+      dataChronological[i] = 0;
+
+    this.setState({ dataChronological });
+
+    console.log("data chron");
+    console.log(dataChronological);
+
     /* Get the ethernet data */
     app = this.props.db.database().ref('/ethernet_real');
     app.on('value', snapshot => {
@@ -61,12 +77,16 @@ class Senddata extends Component {
 
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      const INTERVAL = .01; /* Interval to count packets at */
 
       let timestamps = [];
-      for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
-      console.log(timestamps);
+      console.log("past date");
+      for (let item in sortedData) {
+        timestamps.push(Math.abs(parseFloat(sortedData[item].TIME) - (pastDate.getTime() / 1000)));
+      }
+
       for (let i = 0; i < timestamps.length; ++i) {
+        if (timestamps[i] < 0 || timestamps[i] > INTERVAL * ELAPSED_SECONDS) continue;
+
         if (timestamps[i] % INTERVAL == 0) {
           let idx = timestamps[i] / INTERVAL;
           if (!dataChronological[idx])
@@ -80,7 +100,7 @@ class Senddata extends Component {
           ++dataChronological[idx];
         }
       }
-      console.log(dataChronological);
+
       /* Store the packet counts into state */
       this.setState({ dataChronological });
     });
@@ -127,12 +147,13 @@ class Senddata extends Component {
 
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      const INTERVAL = .01; /* Interval to count packets at */
 
       let timestamps = [];
       for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
 
       for (let i = 0; i < timestamps.length; ++i) {
+        if (timestamps[i] < 0 || timestamps[i] > INTERVAL * ELAPSED_SECONDS) continue;
+
         if (timestamps[i] % INTERVAL == 0) {
           let idx = timestamps[i] / INTERVAL;
           if (!dataChronological[idx])
@@ -193,12 +214,12 @@ class Senddata extends Component {
 
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      const INTERVAL = .01; /* Interval to count packets at */
 
       let timestamps = [];
       for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
 
       for (let i = 0; i < timestamps.length; ++i) {
+        if (timestamps[i] < 0 || timestamps[i] > INTERVAL * ELAPSED_SECONDS) continue;
 
         if (timestamps[i] % INTERVAL == 0) {
           let idx = timestamps[i] / INTERVAL;
@@ -215,14 +236,13 @@ class Senddata extends Component {
 
       }
 
-      console.log(dataChronological);
       /* Store the packet counts into state */
       this.setState({ dataChronological });
     });
   }
 
   componentDidUpdate(){
-
+    console.log(this.state);
   }
 
   /* Render the UI components */
