@@ -11,13 +11,29 @@ import pyrebase
 import time
 import ast
 import getpass
+import argparse
+from requests.exceptions import HTTPError
 
+#
+# Global Variables and Helper Functions
+#
+
+# Flag to stop capture
 stop = False
 
-#
-# Signal Handlers
-#
+# User Prompt for Credentials
+def get_cred():
+	print("Email: ", end='')
+	em = input()
+	pw = getpass.getpass()
+	return {"email": em, "password": pw}
 
+# MAC Address Formatter
+def mac_format(mac_bytes):
+	formatted = "%.2s:%.2s:%.2s:%.2s:%.2s:%.2s" % ((ord(mac_bytes[0])), (ord(mac_bytes[1])), (ord(mac_bytes[2])), (ord(mac_bytes[3])), (ord(mac_bytes[4])), (ord(mac_bytes[5])))
+	return formatted
+
+# Signal Handler
 def sig_handler(sig, frame):
 	print("Stopping packet capture...")
 	global stop
@@ -28,14 +44,11 @@ def sig_handler(sig, frame):
 # Packet Parsing
 #
 
-def mac_format(mac_bytes):
-	formatted = "%.2s:%.2s:%.2s:%.2s:%.2s:%.2s" % ((ord(mac_bytes[0])), (ord(mac_bytes[1])), (ord(mac_bytes[2])), (ord(mac_bytes[3])), (ord(mac_bytes[4])), (ord(mac_bytes[5])))
-	return formatted
-
 class capture:
 	def __cinit__(self):
 		self.data = None
 
+	# Parse Ethernet Frame Header
 	def parse_eth_header(self, data):
 		temp = struct.unpack("!6s6sH", data)
 		d_mac = mac_format(binascii.hexlify(temp[0]).decode("utf-8"))
@@ -47,6 +60,7 @@ class capture:
 			"TIMESTAMP": None}
 		return eth_header
 
+	# Parse IP Packet Header
 	def parse_ip_header(self, data):
 		temp = struct.unpack("!BBHHHBBH4s4s", data)
 		ver = temp[0]
@@ -72,6 +86,7 @@ class capture:
 			"TIMESTAMP": None}
 		return ip_header
 
+	# Parse TCP Segment Header
 	def parse_tcp_header(self, data):
 		temp = struct.unpack("!HHLLBBHHH", data)
 		s_port = temp[0]
@@ -100,7 +115,7 @@ class capture:
 # Packet Sniffing
 #
 
-def sniff():
+def sniff(timeout = None, verbosity = None):
 	# If OS is Windows
 	if os.name == "nt":
 		s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
@@ -113,24 +128,28 @@ def sniff():
 	else:
 		s = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0800))
 
+	# Set nonblocking capture and interrupt signal handler
 	s.setblocking(0)
 	signal.signal(signal.SIGINT, sig_handler)
 
+	# Setup for capture
 	f = open("my_packets", "w")
-
 	print("Starting packet capture...")
+	start = time.time()
 
-	# Loop to read packets
+	# Loop to capture packets
 	while True:
 		global stop	
 		readable, writable, exceptional = select.select([s], [], [], 0)
 
+		timestamp = time.time()
+
 		if readable:
-			timestamp = time.time()
+			# Receive bytestream from socket
 			pkt = s.recvfrom(65535)
 
+			# Parse captured bytestream
 			cap = capture()
-
 			eth = cap.parse_eth_header(pkt[0][0:14])
 			eth.update({"TIMESTAMP": timestamp})
 			ip = cap.parse_ip_header(pkt[0][14:34])
@@ -138,16 +157,26 @@ def sniff():
 			tcp = cap.parse_tcp_header(pkt[0][34:54])
 			tcp.update({"TIMESTAMP": timestamp})
 
-			print("Ethernet: " + str(eth))
-			print("IP: " + str(ip))
-			print("TCP: " + str(tcp) + "\n")
+			# Terminal Output
+			if verbosity == "verbose":
+				print("Ethernet: " + str(eth))
+				print("IP: " + str(ip))
+				print("TCP: " + str(tcp) + "\n")
+
+			elif verbosity == "silent":
+				pass
+
+			else:
+				print("Packet from %s to %s" % (ip["SRC_ADDR"], ip["DST_ADDR"]))
 
 			f.write("\n" + json.dumps(eth) + "\n" + json.dumps(ip) + "\n" + json.dumps(tcp) + "\n")
-	
-		if stop:
+
+		# Condition to stop capturing
+		if stop or (timeout and (timestamp - start) > timeout):
 			f.close()
 			break
 
+	# Reset to default signal handler
 	signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
@@ -155,26 +184,22 @@ def sniff():
 # Upload to Firebase
 #
 
-def fb_upload(credentials):
+def fb_upload(credentials = None):
 	fb_auth = open("ignoreme.json", "r")
 	auth_data = json.load(fb_auth)
 
 	config = {"apiKey": auth_data["apiKey"],
 			"authDomain": auth_data["authDomain"],
 			"databaseURL": auth_data["databaseURL"],
-			"storageBucket": auth_data["storageBucket"]
-			}
+			"storageBucket": auth_data["storageBucket"]}
 
 	firebase = pyrebase.initialize_app(config)
 	auth = firebase.auth()
 	try:
-		if(credentials):
-			user = auth.sign_in_with_email_and_password(credentials["email"], credentials["password"])
-		else:
-			print("Email: ", end='')
-			em = input()
-			pw = getpass.getpass()
-			user = auth.sign_in_with_email_and_password(em, pw)
+		if not credentials:
+			credentials = get_cred()
+
+		user = auth.sign_in_with_email_and_password(credentials["email"], credentials["password"])
 
 		db = firebase.database()
 
@@ -188,14 +213,41 @@ def fb_upload(credentials):
 			ip = json.loads(f.readline())
 			tcp = json.loads(f.readline())
 
-			db.child("ethernet").push(eth, user["idToken"])
-			db.child("ip").push(ip, user["idToken"])
-			db.child("tcp").push(tcp, user["idToken"])
-
+			db.child("ethernet_real").push(eth, user["idToken"])
+			db.child("ip_real").push(ip, user["idToken"])
+			db.child("tcp_real").push(tcp, user["idToken"])
 
 		f.close()
-	except:
+
+	except HTTPError as e:
+		print("Error: " + ast.literal_eval(e.strerror)["error"]["errors"][0]["message"])
 		print("Login Failed, no data uploaded...")
+
+
+#
+# Create Firebase User
+#
+
+def fb_register():
+	fb_auth = open("ignoreme.json", "r")
+	auth_data = json.load(fb_auth)
+
+	config = {"apiKey": auth_data["apiKey"],
+			"authDomain": auth_data["authDomain"],
+			"databaseURL": auth_data["databaseURL"],
+			"storageBucket": auth_data["storageBucket"]}
+
+	firebase = pyrebase.initialize_app(config)
+	auth = firebase.auth()
+
+	try:
+		print("Register a New User")
+		credentials = get_cred()
+		auth.create_user_with_email_and_password(credentials["email"], credentials["password"])
+		print("Registration success!")
+	except HTTPError as e:
+		print("Error: " + ast.literal_eval(e.strerror)["error"]["errors"][0]["message"])
+		print("Registration Failed...")
 
 
 #
@@ -203,9 +255,34 @@ def fb_upload(credentials):
 #
 
 def main():
-	# TODO: implement command-line options
-	sniff()
-	fb_upload(None)
+	# Parse command-line options
+	parser = argparse.ArgumentParser(description="Capture Ethernet Frames, IP Packets, and TCP Segments")
+	parser.add_argument("-r", "--register", action="store_true", help="Register a new user for the database")
+	parser.add_argument("-t", "--timeout", type=int, metavar="", help="Specify how long to capture packets (in seconds)")
+	upl = parser.add_mutually_exclusive_group()
+	upl.add_argument("-n", "--no-upload", action="store_true", help="Do not upload packets to Firebase")
+	upl.add_argument("-U", "--upload-only", action="store_true", help="Upload current log without capturing")
+	output = parser.add_mutually_exclusive_group()
+	output.add_argument("-v", "--verbose", action="store_true", help="Show all details of packets logged")
+	output.add_argument("-s", "--silent", action="store_true", help="Don't show captured packets")
+	args = parser.parse_args()
+
+	if args.register:
+		fb_register()
+		exit(0)
+
+	if not args.upload_only:
+		verbosity = None
+		
+		if args.verbose:
+			verbosity = "verbose"
+		elif args.silent:
+			verbosity = "silent"
+
+		sniff(args.timeout, verbosity)
+
+	if not args.no_upload:
+		fb_upload(None)
 
 main()
 
