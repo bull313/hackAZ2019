@@ -120,9 +120,9 @@ def sniff(timeout = None, verbosity = None):
 	if os.name == "nt":
 		s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
 		# bind to your IP
-		s.bind(("10.143.150.54", 0))
+		s.bind(("10.143.158.105", 0))
 		s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
-		s.ioctl(socket.SIO_RCVCALL, socket.RCVCALL_ON)
+		s.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
 
 	# If OS is *nix
 	else:
