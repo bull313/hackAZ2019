@@ -1,17 +1,57 @@
 import React, {Component} from 'react';
 import './css/Widget.css';
-import {Bar} from 'react-chartjs-2';
+import {Bar, Line} from 'react-chartjs-2';
+
 
 class Widget extends Component{
 
   constructor(props){
     super(props);
   }
+  render(){
+    //using a temporary empty object for the charts data.
 
-  render() {
-    var dat = {};
+    var dat = {}
+    //checking to see what type of graph we need to execute.
+    switch(this.props.type){
+      case 'Bar':
+                  dat = {
+                   chartData: {
+                     labels: this.props.labels,
+                     datasets: [{
+                       label: this.props.title,
+                       data: this.props.data,
+                       backgroundColor:[
+                         'rgb(205, 94, 94)',
+                         'rgb(71, 162, 195)',
+                         'rgb(71, 195, 121)'
+                       ]
+                     }]
 
-    if(this.props.type == 'Bar') {
+                   }
+                 }
+                 break;
+      case 'Line':
+                  //console.log(this.props.data);
+                  dat = {
+                   chartData: {
+                     labels: this.props.labels,
+                     datasets: [{
+                       label: this.props.title,
+                       data: this.props.data,
+                       backgroundColor:[
+                         'rgb(205, 94, 94)'
+                       ],
+                       pointBackgroundColor: 'rgb(0, 195, 121)'
+                     }]
+
+                   }
+                 }
+                 break;
+      default:
+                break;
+    }
+    /*if(this.props.type == 'Bar'){
        dat = {
         chartData: {
           labels: this.props.labels,
@@ -27,16 +67,16 @@ class Widget extends Component{
 
         }
       }
-    }
+    }*/
 
-    return (
+    return(
       <div class='outershell'>
-        {this.props.type == 'Bar' &&
+        { this.props.type == 'Bar' &&
         <Bar data={dat.chartData} options={{
           maintainAspectRatio: false,
           title:{
             display: true,
-            text: 'Number of Unique Source MAC Addresses',
+            text: this.props.title,
             fontSize: 25
           },
           legend:{
@@ -46,6 +86,27 @@ class Widget extends Component{
                 yAxes : [{
                     ticks : {
                         suggestedMax : 5,
+                        suggestedMin : 0
+                    }
+                }]
+            }
+        }}/>
+      }
+      {this.props.type == 'Line' &&
+        <Line data={dat.chartData} options={{
+          maintainAspectRatio: false,
+          title:{
+            display: true,
+            text: this.props.title,
+            fontSize: 25
+          },
+          legend:{
+            display: false
+          },
+          scales: {
+                yAxes : [{
+                    ticks : {
+                        suggestedMax : 10,
                         suggestedMin : 0
                     }
                 }]

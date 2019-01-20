@@ -238,7 +238,7 @@ class Senddata extends Component {
         labels={Object.keys(this.state.tcpPorts)} data={Object.values(this.state.tcpPorts)} />
 
         <Widget type='Line' title='Packet occurences by time frame'
-        labels={Object.values(this.state.dataChronological)} data={Object.keys(this.state.dataChronological)} />
+        labels={Object.keys(this.state.dataChronological)} data={Object.values(this.state.dataChronological)} />
 
       </div>
     )
