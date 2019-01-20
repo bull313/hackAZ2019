@@ -4,6 +4,9 @@
   background-color: #6600CC;
 }
 
+nav.navbar.navbar-expand-lg.navbar-light.bg-light{
+  background-color: #6600CC!important;
+}
 
 nav{
   height: 5rem;

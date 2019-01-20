@@ -19,13 +19,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-      <Header store={this.props.store} changePage={this.props.changePage}/>
-        {this.props.store.getState().page.page == 'Home' &&
+      <Header />
         <Senddata db={firebase}/>
-        ||
-        this.props.store.getState().page.page == 'View' &&
-        <Dashboard db={firebase}/>
-        }
+
       </div>
     );
   }

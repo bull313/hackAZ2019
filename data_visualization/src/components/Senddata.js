@@ -34,7 +34,7 @@ class Senddata extends Component {
     let app = null; /* Firebase data fetch reference */
 
     /* Get the ethernet data */
-    app = this.props.db.database().ref('/ethernet');
+    app = this.props.db.database().ref('/ethernet_real');
     app.on('value', snapshot => {
       var val = snapshot.val(); /* Holds the newly fetched data   */
       var buffer = [];          /* Holds the data to put in state */
@@ -44,7 +44,7 @@ class Senddata extends Component {
           DST_MAC:      val[item].DST_MAC,
           SRC_MAC:      val[item].SRC_MAC,
           ETH_PROTOCOL: val[item].ETH_PROTOCOL,
-          TIME:         val[item].TIME
+          TIME:         val[item].TIMESTAMP
         });
       }
 
@@ -61,11 +61,11 @@ class Senddata extends Component {
 
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      const INTERVAL = 1; /* Interval to count packets at */
+      const INTERVAL = .01; /* Interval to count packets at */
 
       let timestamps = [];
       for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
-
+      console.log(timestamps);
       for (let i = 0; i < timestamps.length; ++i) {
         if (timestamps[i] % INTERVAL == 0) {
           let idx = timestamps[i] / INTERVAL;
@@ -80,13 +80,13 @@ class Senddata extends Component {
           ++dataChronological[idx];
         }
       }
-
+      console.log(dataChronological);
       /* Store the packet counts into state */
       this.setState({ dataChronological });
     });
 
     /* Get the ip data */
-    app = this.props.db.database().ref('/ip');
+    app = this.props.db.database().ref('/ip_real');
     app.on('value', snapshot => {
       var val = snapshot.val(); /* Holds the newly fetched data   */
       var buffer = [];          /* Holds the data to put in state */
@@ -103,7 +103,7 @@ class Senddata extends Component {
             CHECKSUM:         val[item].CHECKSUM,
             SRC_ADDR:         val[item].SRC_ADDR,
             DST_ADDR:         val[item].DST_ADDR,
-            TIME:             val[item].TIME
+            TIME:             val[item].TIMESTAMP
         });
       }
 
@@ -127,7 +127,7 @@ class Senddata extends Component {
 
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      const INTERVAL = 1; /* Interval to count packets at */
+      const INTERVAL = .01; /* Interval to count packets at */
 
       let timestamps = [];
       for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
@@ -152,7 +152,7 @@ class Senddata extends Component {
     });
 
     /* Get the tcp data */
-    app = this.props.db.database().ref('/tcp');
+    app = this.props.db.database().ref('/tcp_real');
     app.on('value', snapshot => {
       var val = snapshot.val(); /* Holds the newly fetched data   */
       var buffer = [];          /* Holds the data to put in state */
@@ -168,7 +168,7 @@ class Senddata extends Component {
           WINDOW_SIZE:      val[item].WINDOW_SIZE,
           CHECKSUM:         val[item].CHECKSUM,
           URGENT_PTR:       val[item].URGENT_PTR,
-          TIME:             val[item].TIME
+          TIME:             val[item].TIMESTAMP
         });
       }
 
@@ -190,14 +190,16 @@ class Senddata extends Component {
       /* Sort the TCP objects by time */
       let sortedData = sortDataByProp(buffer, (a, b) => { return a.TIME - b.TIME });
 
+
       /* Get the number of packets at each timestamp */
       let dataChronological = { ...this.state.dataChronological };
-      const INTERVAL = 1; /* Interval to count packets at */
-
+      const INTERVAL = .01; /* Interval to count packets at */
+      
       let timestamps = [];
       for (let item in sortedData) timestamps.push(parseFloat(sortedData[item].TIME));
 
       for (let i = 0; i < timestamps.length; ++i) {
+
         if (timestamps[i] % INTERVAL == 0) {
           let idx = timestamps[i] / INTERVAL;
           if (!dataChronological[idx])
@@ -210,7 +212,9 @@ class Senddata extends Component {
             dataChronological[idx] = 0;
           ++dataChronological[idx];
         }
+
       }
+
 
       /* Store the packet counts into state */
       this.setState({ dataChronological });
@@ -218,15 +222,14 @@ class Senddata extends Component {
   }
 
   componentDidUpdate(){
-    console.log("Senddata updated");
-    console.log(this.state);
+
   }
 
   /* Render the UI components */
   render(){
     return (
       <div>
-        
+
         <Widget type='Bar' title='Number of Unique Source MAC Addresses'
         labels={Object.keys(this.state.uniqueMACAddresses)} data={Object.values(this.state.uniqueMACAddresses)} />
 
