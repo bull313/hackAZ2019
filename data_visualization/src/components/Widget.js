@@ -41,8 +41,6 @@ class Widget extends Component{
                  }
                  break;
       case 'Line':
-                  //console.log(this.props.data);
-                  //console.log(this.props.labels[0]);
                   let newData = [0];
                   let graphData =[0];
                   var hours = this.props.labels[0] % 3600;
